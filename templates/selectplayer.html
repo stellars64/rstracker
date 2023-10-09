@@ -1,0 +1,29 @@
+{% extends "home.html" %}
+
+{% block navigation %}
+<nav class="rstracker-panel">
+    <span class="material-symbols-outlined">trending_up</span>
+    <span class="nav-text">rs3tracker</span>
+
+    <form id="select_skill_form" method="post" action="/select_skill">
+        <input style="visibility: hidden; width: 10px;" id="select_skill_input" name="skill">
+    </form>
+
+    <div>
+        {% for skill_number, skill_info in skills.items() %}
+        <img class="skillset-icon" src="{{ url_for('static', filename='skillicons/' + skill_info.image) }}" alt="{{ skill_info.alt }}"
+            onclick="getElementById('select_skill_input').value='{{ skill_number }}'; getElementById('select_skill_form').submit();"
+            disabled>
+        {% endfor %}
+    </div>
+
+    <form id="select_player_form" method="post" action="/select_player">
+        <label for="player">Player</label>
+        <input name="player" label="Player"></input>
+    </form>
+</nav>
+{% endblock %}
+
+{% block content %}
+Welcome to rs3tracker! To start, please enter a player name.
+{% endblock %}

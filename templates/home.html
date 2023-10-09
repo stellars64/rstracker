@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+
+<html lang="en">
+    <head>
+        <meta name="viewport" content="initial-scale=1, width=device-width">
+        <script type="text/javascript" src="https://cdn.bokeh.org/bokeh/release/bokeh-3.2.2.min.js"></script>
+        <script type="text/javascript">
+            Bokeh.set_log_level("info");
+        </script>
+        <script type="text/javascript" src="{{ url_for('static', filename='rstracker.js') }}"></script>
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+        <title>rstracker</title>
+        {{ script | safe }}
+    </head>
+    <body>
+        <div id="rstracker-background">
+            <nav class="topnav">
+                <div>
+                    <i class="material-symbols-outlined">trending_up</i>
+                    <label>rstracker</label>
+                </div>
+                <div style="font-size: 0.5em;">
+                    <input id='player1-username-input' placeholder="Player 1 Username" onkeydown="
+                        if(event.key==='Enter') {
+                            lookup(document.getElementById('player1-username-input').value, '{{userdata.user1.tracked_skill}}' != '' ? '{{userdata.user1.tracked_skill}}' : '0', document.getElementById('player2-username-input').value, '{{userdata.user2.tracked_skill}}' != '' ? '{{userdata.user2.tracked_skill}}' : '0');
+                        }
+                    ">
+                    <input type="checkbox" onchange="
+                        document.getElementById('player2-username-input').disabled = !event.target.checked;
+                    ">
+                    <input id='player2-username-input' placeholder="Player 2 Username" onkeydown="
+                        if(event.key==='Enter') {
+                            lookup(document.getElementById('player1-username-input').value, '{{userdata.user1.tracked_skill}}' != '' ? '{{userdata.user1.tracked_skill}}' : '0', document.getElementById('player2-username-input').value, '{{userdata.user2.tracked_skill}}' != '' ? '{{userdata.user2.tracked_skill}}' : '0');
+                        }
+                    ">
+                </div>
+            </nav>
+            <div id="rstracker-container">
+                {% block content %} {% endblock %}
+            </div>
+        </div>
+    </body>
+</html>

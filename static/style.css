@@ -1,0 +1,342 @@
+* {
+  font-family: Courier, sans-serif;
+  box-sizing: border-box;
+}
+
+html, body {
+  background-color: #111111;
+  margin: 0 0 0 0;
+  height: 100%;
+}
+
+table {
+  border-color: #453953;
+  border-radius: 3px;
+  border: solid;
+}
+
+form {
+  display: inline-block;
+}
+
+input {
+  border-radius: 10px;
+  border: solid;
+  padding: 5px;
+  margin: 5px;
+  color: #453953;
+  background-color: #f3cba5;
+  
+}
+
+input:focus {
+  outline: none;
+}
+
+label {
+  font-size: 1em;
+  white-space: nowrap;
+}
+
+/*
+ * Page stuff
+ * This is the beige background
+ */
+#rstracker-background {
+  max-width: 100%;
+  height: 100%;
+  margin: 0 auto;
+  background-color: #f3cba5;
+}
+
+/*
+ * This is the page content, which is slightly
+ * smaller than background at max width
+ */
+#rstracker-container {
+  max-width: 100%; 
+  margin: 0 auto;
+}
+
+/*
+ * This is the page's content, below the
+ * nav bar
+ */
+#rstracker {
+  display: flex;
+  flex-flow: column nowrap;
+}
+
+#rstracker-settings {
+  margin-bottom: 1em;
+}
+
+#rstracker-content {
+  display: flex;
+  flex-flow: row nowrap;
+}
+
+.graph-container {
+  margin: 10px;
+}
+
+.topnav {
+  overflow: hidden;
+  background-color: #453953;
+  color: #f3cba5;
+  font-size: 2em;
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: space-between;
+}
+
+.rstracker-username-textbox {
+  width: 12em;
+}
+
+/* .rstracker-username-textbox:disabled {
+  background-color: gray;
+  color: gray;
+} */
+
+.rstracker-username-textbox:disabled > input {
+  background-color: gray;
+  color: gray;
+}
+
+.rstracker-dark-panel {
+    color: #f3cba5;
+    background-color: #453953;
+    padding: 1em;
+    border: solid;
+    border-color: #453953;
+    border-radius: 3px;
+}
+
+.rstracker-light-panel {
+    color: #f3cba5;
+    background-color: #975a5e;
+    padding: 1em;
+    border: none;
+    border-color: #453953;
+    border-radius: 3px;
+}
+
+/* RENAME this later! */
+.player-panel {
+  display: flex;
+  flex-flow: column nowrap;
+  flex-grow: 0;
+  margin: 10px;
+}
+
+.player-panel-avatar {
+  width: 100px;
+  height: 100px;
+}
+
+/* New with player-panel-new */
+.player-panel-info-wrapper {
+  display: flex;
+  flex-flow: row nowrap;
+}
+
+.player-panel-info {
+  display: flex;
+  flex-flow: column nowrap;
+}
+
+.player-info-label {
+    font-size: 1.5em;
+    font-weight: bold;
+    display: inline;
+    vertical-align: middle;
+}
+
+.rstracker-hr {
+    color: #453953;
+}
+
+/*
+ * Old flexbox stuff, being replaced...
+ */
+.row {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  flex-basis: 100%;
+  flex: 1;
+}
+
+/*
+ * Skillset Stuff
+ */
+
+.skillset {
+  width: fit-content;
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: center;
+}
+
+.scale-75 {
+  scale: 0.75;
+}
+
+
+.skillset-element {
+  flex-basis: 33.3333%;
+  width: fit-content;
+  border-width: 2px;
+  padding: 2px 2px 2px 2px;
+  margin: -1px -1px -1px -10px;
+  background: linear-gradient(to top, #9C827C 30px, #f3cba5 20px);
+  display: inline-block;
+  border: solid;
+  border-radius: 4px;
+  color: #453953;
+}
+
+.skillset-element:hover {
+  cursor: pointer;
+  border-color: gold;
+  background-color: gold;
+  scale: 1.25;
+}
+
+
+.skillset-icon {
+  width: 16px;
+  height: 16px;
+  flex: 1;
+}
+
+.skillset-element-top {
+  display: flex;
+  flex-flow: row nowrap;
+}
+
+.skillset-element-bottom {
+  display: flex;
+  flex-flow: column nowrap;
+}
+
+.skillset-text-small {
+  color: #000000;
+  font-size: 0.75em;
+}
+
+.skillset-text-large {
+  color: #000000;
+  font-size: 1em;
+  text-align: center;
+  flex: 2;
+}
+
+/*
+ * Unorganized!
+ */
+
+.nav-text {
+  font-size: 24px
+}
+
+.player-info-text {
+  color: #453953;
+}
+
+
+/* The switch - the box around the slider */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+  background-color: black;
+}
+
+/* Hide default HTML checkbox */
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* The slider */
+/* .slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+input:checked + .slider {
+  background-color: #2196F3;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #2196F3;
+}
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(26px);
+  -ms-transform: translateX(26px);
+  transform: translateX(26px);
+} */
+
+
+.material-icons {
+    font-family: 'Material Icons';
+    font-weight: normal;
+    font-style: normal;
+    font-size: 24px;  /* Preferred icon size */
+    display: inline-block;
+    line-height: 1;
+    text-transform: none;
+    letter-spacing: normal;
+    word-wrap: normal;
+    white-space: nowrap;
+    direction: ltr;
+  
+    /* Support for all WebKit browsers. */
+    -webkit-font-smoothing: antialiased;
+    /* Support for Safari and Chrome. */
+    text-rendering: optimizeLegibility;
+  
+    /* Support for Firefox. */
+    -moz-osx-font-smoothing: grayscale;
+  
+    /* Support for IE. */
+    font-feature-settings: 'liga';
+}
+
+.material-symbols-outlined {
+  font-variation-settings:
+  'FILL' 0,
+  'wght' 300,
+  'GRAD' 0,
+  'opsz' 48
+}
