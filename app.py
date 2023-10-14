@@ -17,10 +17,15 @@ from rs3_api.hiscores.exceptions import UserNotFoundException
 
 # ----- Constants -----
 
+# COLOR_PALETTE = {
+#     'light': '#f3cba5',
+#     'medium': '#975a5e',
+#     'dark': '#453953'
+# }
 COLOR_PALETTE = {
-    'light': '#f3cba5',
-    'medium': '#975a5e',
-    'dark': '#453953'
+    'light': '#ffffff',
+    'medium': '#aaaaaa',
+    'dark': '#333333'
 }
 
 SKILL_INFO = {
@@ -237,6 +242,8 @@ app = Flask(__name__)
 @app.route('/<name>/<skill>')
 @app.route('/<name>/<skill>/<name2>/<skill2>')
 def rstracker(name=None, skill=None, name2=None, skill2=None):
+    
+    newuserdata = []
 
     userdata = {
         'user1': {},
@@ -251,14 +258,32 @@ def rstracker(name=None, skill=None, name2=None, skill2=None):
             playerdata1 = PlayerData(name)
             userdata['user1'] = {
                 'tracked_skill': skill,
-                'hiscores': playerdata1.latest_data().data
+                'hiscores': playerdata1.latest_data().data,
+                'history': playerdata1
             }
+            
+            # this is possibly the new form the data will be passed to the web page in
+            newuserdata.append({
+                'tracked_skill': skill,
+                'hiscores': playerdata1.latest_data().data,
+                'history': playerdata1
+            })
+
             if name2:
                 playerdata2 = PlayerData(name2)
                 userdata['user2'] = {
                     'tracked_skill': skill2,
-                    'hiscores': playerdata2.latest_data().data
+                    'hiscores': playerdata2.latest_data().data,
+                    'history': playerdata2
                 }
+
+                # this is possibly the new form the data will be passed to the web page in (p2)
+                newuserdata.append({
+                    'tracked_skill': skill,
+                    'hiscores': playerdata2.latest_data().data,
+                    'history': playerdata2
+                })
+
     except UserNotFoundException:
         print('user not found?')
         
@@ -283,17 +308,32 @@ def rstracker(name=None, skill=None, name2=None, skill2=None):
 
     script, div = components(graph)
 
+    print('returning rstracker.html, this page should be found????')
     return render_template(
             'rstracker.html',
             script=script,
             div=div,
-            userdata=userdata)
+            userdata=userdata,
+            newuserdata=newuserdata)
+
+# @app.route('/lookup', methods=['POST'])
+# def lookup():
+#     username = request.form.get('username')
+#     skill = request.form.get('skill')
+#     print("lookup happened")
+#     return redirect(posixpath.join(username, skill))
 
 @app.route('/lookup', methods=['POST'])
 def lookup():
-    username = request.form.get('username')
-    skill = request.form.get('skill')
-    return redirect(posixpath.join(username, skill))
+    username1 = request.form.get('username1')
+    username2 = request.form.get('username2')
+    skill1 = request.form.get('skill1')
+    skill2 = request.form.get('skill2')
+    if username2:
+        return redirect(posixpath.join(username1, skill1, username2, skill2))
+    else:
+        return redirect(posixpath.join(username1, skill1))
+
 
 @app.route('/lookup2', methods=['POST'])
 def lookup2():
@@ -375,9 +415,8 @@ def create_line_graph(player_data, player_skill, player2_data, player2_skill):
                 x_axis_label='Time',
                 y_axis_label='Exp',
                 x_axis_type='datetime',
-                width=1200,
-                # sizing_mode='scale_width', ? not working?
-                max_width=3000,
+                sizing_mode='stretch_width',
+                max_width=1280,
                 background_fill_color=COLOR_PALETTE['medium'],
                 border_fill_color=COLOR_PALETTE['dark'],
                 outline_line_color=COLOR_PALETTE['medium'])
@@ -437,9 +476,7 @@ def create_line_graph(player_data, player_skill, player2_data, player2_skill):
                 x_axis_label='Time',
                 y_axis_label='Exp',
                 x_axis_type='datetime',
-                width=1000,
-                # sizing_mode='scale_width', ? not working?
-                max_width=3000,
+                sizing_mode='stretch_width',
                 background_fill_color=COLOR_PALETTE['medium'],
                 border_fill_color=COLOR_PALETTE['dark'],
                 outline_line_color=COLOR_PALETTE['medium'])

@@ -1,26 +1,142 @@
-{% extends "home.html" %}
+<!DOCTYPE html>
+<html lang="en">
 
-{% block content %}
-<section id="rstracker">
-    <section id="rstracker-content">
-        {% for key, data in userdata.items() %} 
-        {% include 'playerinfo.html' %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script type="text/javascript" src="https://cdn.bokeh.org/bokeh/release/bokeh-3.2.2.min.js"></script>
+    {{ script | safe }}
+    <link rel="stylesheet" href="{{ url_for('static', filename='dist/css/output.css')}}">
+    <title>rstracker</title>
+</head>
+
+<body class="min-h-screen bg-white dark:bg-black dark:text-white font-sans">
+    <header class="bg-amber-600 text-white sticky top-0 z-10">
+        <section class="max-w-7xl mx-auto p-2 flex justify-between items-center">
+            <h1 class="text-3xl">
+                📈rstracker
+            </h1> 
+            <span class="flex flex-row">
+                <form id="user-info-form" method="post" action="/lookup">
+                    <input type="submit" class="hidden">
+                    <input id="username1" class="rounded bg-white dark:bg-black px-2" name="username1" type="text" placeholder="username 1"/>
+                    <input id="skill1" class="hidden" name="skill1" type="text" value="0"/>
+                    <input id="username2" class="rounded bg-white dark:bg-black px-2" name="username2" type="text" placeholder="username 2"/>
+                    <input id="skill2" class="hidden" name="skill2" type="text" value="0"/>
+                </form>
+                
+                <div class="relative">
+                    <button class="px-2 hover:cursor-pointer hover:bg-amber-800 group">
+                        Change Timescale
+                        <div id="dropdownmenu" class="absolute left-0 top-[calc(100%+.25rem)] bg-amber-800 hover:bg-amber-700 p-3 shadow shadow-amber-200 rounded opacity-0 group-focus:opacity-100 transition-opacity">
+                            <ul>
+                                <li>Last Update</li>
+                                <li>Weekly</li>
+                                <li>Monthly</li>
+                                <li>Yearly</li>
+                                <li>All Time</li>
+                            </ul>
+                        </div>
+                    
+                    </button>
+                    
+                    <!-- This is the dropdown menu -->
+                    <!-- <div id="dropdownmenu" class="absolute left-0 top-[calc(100%+.25rem)] bg-amber-800 p-3 shadow shadow-amber-200 rounded opacity-0 group-focus:opacity-100 transition-opacity">
+                       content 
+                    </div> -->
+                </div>
+                
+            </span>
+        </section>
+    </header>
+    
+    <section id="player-stats" class="max-w-7xl mx-auto my-4 flex flex-row justify-between items-center">
+        {% for key, data in userdata.items() %}
+        {% if data %}
+        <section class="flex flex-col items-center">
+            <div class="flex flex-row">
+                <img class="w-16 h-16" src="https://services.runescape.com/m=avatar-rs/{{ data.hiscores.username }}/chat.png" alt="">
+                <div class="flex flex-col">
+                    {% if data.hiscores.account_type.value == 'ironman' %}
+                    <label title="ironman">🔧 {{ data.hiscores.username }}</label>
+                    {% elif data.hiscores.account_type.value == 'hardcore_ironman' %}
+                    <label title="hardcore ironman">🍅 {{ data.hiscores.username }}</label>
+                    {% else %}
+                    <label title="normal">{{ data.hiscores.username }}</label>
+                    {% endif %}
+                    <label title="total level">{{ data.hiscores.skills['overall'].level }}<strong> total</strong></label>
+                    <label title="total exp">{{ data.hiscores.skills['overall'].experience | num_to_comma_string }}<strong> xp</strong></label>
+                </div>
+            </div>
+
+            <div class="flex flex-row flex-wrap justify-center">
+                {% for s in [1,4,15,3,17,14,2,16,11,5,18,8,6,13,12,7,10,9,21,19,20,23,22,24,25,26,27,28,29,0] %}
+                <div class="w-24 p-1 border
+                {% if (data.hiscores.username == userdata.user1.hiscores.username and s|string == userdata.user1.tracked_skill) or ('hiscores' in userdata.user2 and data.hiscores.username == userdata.user2.hiscores.username and s|string == userdata.user2.tracked_skill) %}
+                bg-amber-800 border-amber-700
+                {% else %}
+                bg-gray-800 border-gray-900 hover:bg-gray-700 hover:border-gray-800 hover:cursor-pointer hover:scale-110
+                {% endif %}
+                "
+                     
+                {% if newuserdata|length == 1 %}
+                onclick="
+                    document.getElementById('username1').value = '{{ newuserdata[0].hiscores.username }}';
+                    document.getElementById('skill1').value = '{{ s }}'
+                    document.getElementById('username2').value = '';
+                    document.getElementById('skill2').value = '';
+                    document.getElementById('user-info-form').submit();
+                "
+                {% else %}
+                onclick="
+                    document.getElementById('username1').value = '{{ newuserdata[0].hiscores.username }}';
+                    document.getElementById('username2').value = '{{ newuserdata[1].hiscores.username }}';
+                    if ('{{ data.hiscores.username }}' === '{{ newuserdata[0].hiscores.username }}') {
+                        document.getElementById('skill1').value = '{{ s }}';
+                        document.getElementById('skill2').value = '{{ newuserdata[1].tracked_skill }}';
+                    } else {
+                        document.getElementById('skill1').value = '{{ userdata.user1.tracked_skill }}';
+                        document.getElementById('skill2').value = '{{ s }}';
+                    }
+                    document.getElementById('user-info-form').submit();"
+                {% endif %}
+                >
+
+                    <div class="flex flex-col hover:cursor-pointer">
+                        <div class="flex flex-row justify-around items-center hover:cursor-pointer">
+                            <img class="w-6 h-6 hover:cursor-pointer" src="{{ s | skill_icon_url }}" alt="{{ s | skill_alt_text }}">
+                            <label class="text-lg -translate-y-1 hover:cursor-pointer">{{ data.hiscores | level(s) }}</label>
+                        </div>
+                        <label class="text-xs hover:cursor-pointer">{{ data.hiscores | experience(s) | num_to_comma_string }}<strong> xp</strong></label>
+                        <label class="text-xs hover:cursor-pointer"><strong>rank </strong>{{ data.hiscores | rank(s) | num_to_comma_string }}</label>
+                        {% if data.history.data_points|length > 1 %}
+                            {% set expdiff = data.history.data_points[-1].exp(s) - data.history.data_points[-2].exp(s) %}
+                            {% set rankdiff = data.history.data_points[-1].rank(s) - data.history.data_points[-2].rank(s) %}
+                            {% if expdiff > 0 %}
+                                <label class="text-xs hover:cursor-pointer text-green-600">+{{ expdiff | num_to_comma_string }}<strong> xp</strong></label>
+                            {% endif %}
+                            {% if rankdiff != 0 %}
+                                {% if rankdiff > 0 %}
+                                    <label class="text-xs hover:cursor-pointer text-red-600"><strong>rank </strong>+{{ rankdiff | num_to_comma_string }}</label>
+                                {% else %}
+                                    <label class="text-xs hover:cursor-pointer text-green-600"><strong>rank </strong>{{ rankdiff | num_to_comma_string }}</label>
+                                {% endif %}
+                            {% endif %}
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+        </section>
+        {% endif %}
         {% endfor %}
-        <text class="graph-container">
+    </section>
+    
+    <section id="skill-graph" class="max-w-7xl mx-auto mt-8">
+        <text>
             {{ div | safe }}
         </text>
     </section>
-</section>
-<form id="lookup-form" method="post" action="/lookup" style="visibility: hidden; width: 0px; height: 0px;">
-    <input style="visibility: hidden; width: 10px;" id="lookup-form-username-field" name="username">
-    <input style="visibility: hidden; width: 10px;" id="lookup-form-skill-field" name="skill">
-</form>
-<!-- form for 2nd player, to compare against -->
-<!-- this seems kinda stupid -->
-<form id="lookup-form2" method="post" action="/lookup2" style="visibility: hidden; width: 0px; height: 0px;">
-    <input style="visibility: hidden; width: 10px;" id="lookup-form-username-field1" name="username">
-    <input style="visibility: hidden; width: 10px;" id="lookup-form-skill-field1" name="skill">
-    <input style="visibility: hidden; width: 10px;" id="lookup-form-username-field2" name="username2">
-    <input style="visibility: hidden; width: 10px;" id="lookup-form-skill-field2" name="skill2">
-</form>
-{% endblock %}
+</body>
+</html>
