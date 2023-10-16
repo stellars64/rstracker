@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script type="text/javascript" src="https://cdn.bokeh.org/bokeh/release/bokeh-3.2.2.min.js"></script>
+    <script type="text/javascript" src="https://cdn.bokeh.org/bokeh/release/bokeh-3.3.0.min.js"></script>
     {{ script | safe }}
     <link rel="stylesheet" href="{{ url_for('static', filename='dist/css/output.css')}}">
     <title>rstracker</title>
@@ -37,15 +37,8 @@
                                 <li>All Time</li>
                             </ul>
                         </div>
-                    
                     </button>
-                    
-                    <!-- This is the dropdown menu -->
-                    <!-- <div id="dropdownmenu" class="absolute left-0 top-[calc(100%+.25rem)] bg-amber-800 p-3 shadow shadow-amber-200 rounded opacity-0 group-focus:opacity-100 transition-opacity">
-                       content 
-                    </div> -->
                 </div>
-                
             </span>
         </section>
     </header>
@@ -111,16 +104,8 @@
                         <label class="text-xs hover:cursor-pointer"><strong>rank </strong>{{ data.hiscores | rank(s) | num_to_comma_string }}</label>
                         {% if data.history.data_points|length > 1 %}
                             {% set expdiff = data.history.data_points[-1].exp(s) - data.history.data_points[-2].exp(s) %}
-                            {% set rankdiff = data.history.data_points[-1].rank(s) - data.history.data_points[-2].rank(s) %}
                             {% if expdiff > 0 %}
                                 <label class="text-xs hover:cursor-pointer text-green-600">+{{ expdiff | num_to_comma_string }}<strong> xp</strong></label>
-                            {% endif %}
-                            {% if rankdiff != 0 %}
-                                {% if rankdiff > 0 %}
-                                    <label class="text-xs hover:cursor-pointer text-red-600"><strong>rank </strong>+{{ rankdiff | num_to_comma_string }}</label>
-                                {% else %}
-                                    <label class="text-xs hover:cursor-pointer text-green-600"><strong>rank </strong>{{ rankdiff | num_to_comma_string }}</label>
-                                {% endif %}
                             {% endif %}
                         {% endif %}
                     </div>
