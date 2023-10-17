@@ -1,7 +1,7 @@
 import pickle
 import os
 import posixpath
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 
 from rs3_api.hiscores import Hiscore
@@ -238,10 +238,10 @@ app = Flask(__name__)
 
 # ----- Routes -----
 
-@app.route('/')
-@app.route('/<name>/<skill>')
-@app.route('/<name>/<skill>/<name2>/<skill2>')
-def rstracker(name=None, skill=None, name2=None, skill2=None):
+@app.route('/<timescale>')
+@app.route('/<timescale>/<name>/<skill>')
+@app.route('/<timescale>/<name>/<skill>/<name2>/<skill2>')
+def rstracker(timescale='last_update', name=None, skill=None, name2=None, skill2=None):
     
     newuserdata = []
 
@@ -314,34 +314,20 @@ def rstracker(name=None, skill=None, name2=None, skill2=None):
             script=script,
             div=div,
             userdata=userdata,
-            newuserdata=newuserdata)
-
-# @app.route('/lookup', methods=['POST'])
-# def lookup():
-#     username = request.form.get('username')
-#     skill = request.form.get('skill')
-#     print("lookup happened")
-#     return redirect(posixpath.join(username, skill))
+            newuserdata=newuserdata,
+            timescale=timescale)
 
 @app.route('/lookup', methods=['POST'])
 def lookup():
+    timescale = request.form.get('timescale')
     username1 = request.form.get('username1')
     username2 = request.form.get('username2')
     skill1 = request.form.get('skill1')
     skill2 = request.form.get('skill2')
     if username2:
-        return redirect(posixpath.join(username1, skill1, username2, skill2))
+        return redirect(posixpath.join(timescale, username1, skill1, username2, skill2))
     else:
-        return redirect(posixpath.join(username1, skill1))
-
-
-@app.route('/lookup2', methods=['POST'])
-def lookup2():
-    username = request.form.get('username')
-    skill = request.form.get('skill')
-    username2 = request.form.get('username2')
-    skill2 = request.form.get('skill2')
-    return redirect(posixpath.join(username, skill, username2, skill2))
+        return redirect(posixpath.join(timescale, username1, skill1))
 
 @app.template_filter()
 def num_to_comma_string(num):
@@ -370,6 +356,45 @@ def skill_icon_url(skill):
 @app.template_filter()
 def skill_alt_text(skill):
     return SKILL_INFO[skill]['alt']
+
+@app.template_filter()
+def diff_last_update(userdata, skill):
+    if len(userdata['history'].data_points) > 1:
+        return userdata['history'].latest_data().exp(skill) - userdata['history'].data_points[-2].exp(skill)
+    else:
+        return 0
+
+@app.template_filter()
+def diff_daily(userdata, skill):
+
+    # shorthand vars
+    today = datetime.now().date()
+    data_points = userdata['history'].data_points
+
+    # find the first data point that is today
+    # if exists return diff between that & most recent
+    for update in data_points:
+        if update.timestamp.date() == today:
+            return data_points[-1].exp(skill) - update.exp(skill)
+
+    # if there are no data points for today just return 0
+    return 0
+
+@app.template_filter()
+def diff_weekly(userdata, skill):
+
+    # shorthand vars
+    week_ago = datetime.now().date() - timedelta(days=7)
+    data_points = userdata['history'].data_points
+    
+    # find the first data point that is a week ago or sooner
+    # if exists return diff between that & most recent
+    for update in data_points:
+        if update.timestamp.date() >= week_ago:
+            return data_points[-1].exp(skill) - update.exp(skill)
+        
+    # if there are no data points in last week return 0
+    return 0
 
 # ----- Bokeh Functions -----
 

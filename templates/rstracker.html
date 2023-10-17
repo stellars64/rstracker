@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-
+    
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -19,9 +19,10 @@
             <span class="flex flex-row">
                 <form id="user-info-form" method="post" action="/lookup">
                     <input type="submit" class="hidden">
-                    <input id="username1" class="rounded bg-white dark:bg-black px-2" name="username1" type="text" placeholder="username 1"/>
+                    <input id="timescale" class="hidden" name="timescale" type="text" value='{{ timescale  }}'/>
+                    <input id="username1" class="rounded bg-white text-black dark:bg-black dark:text-white px-2" name="username1" type="text" placeholder="username 1"/>
                     <input id="skill1" class="hidden" name="skill1" type="text" value="0"/>
-                    <input id="username2" class="rounded bg-white dark:bg-black px-2" name="username2" type="text" placeholder="username 2"/>
+                    <input id="username2" class="rounded bg-white text-black dark:bg-black dark:text-white px-2" name="username2" type="text" placeholder="username 2"/>
                     <input id="skill2" class="hidden" name="skill2" type="text" value="0"/>
                 </form>
                 
@@ -30,11 +31,48 @@
                         Change Timescale
                         <div id="dropdownmenu" class="absolute left-0 top-[calc(100%+.25rem)] bg-amber-800 hover:bg-amber-700 p-3 shadow shadow-amber-200 rounded opacity-0 group-focus:opacity-100 transition-opacity">
                             <ul>
-                                <li>Last Update</li>
-                                <li>Weekly</li>
-                                <li>Monthly</li>
-                                <li>Yearly</li>
-                                <li>All Time</li>
+                                <!-- I need to make some kind of submit javascript function -->
+                                <li onclick="
+                                
+    document.getElementById('username1').value = '{{ newuserdata[0].hiscores.username }}';
+                                    document.getElementById('username2').value = '{{ newuserdata[1].hiscores.username }}';
+                                    document.getElementById('skill1').value = '{{ newuserdata[0].tracked_skill }}';
+                                    document.getElementById('skill2').value = '{{ newuserdata[1].tracked_skill }}';
+                                    document.getElementById('timescale').value = 'last_update'; 
+                                    document.getElementById('user-info-form').submit()
+                                ">Last Update</li>
+                                <li onclick="
+                                    document.getElementById('username1').value = '{{ newuserdata[0].hiscores.username }}';
+                                    document.getElementById('username2').value = '{{ newuserdata[1].hiscores.username }}';
+                                    document.getElementById('skill1').value = '{{ newuserdata[0].tracked_skill }}';
+                                    document.getElementById('skill2').value = '{{ newuserdata[1].tracked_skill }}';
+                                    document.getElementById('timescale').value = 'daily'; 
+                                    document.getElementById('user-info-form').submit()
+                                ">Daily</li>
+                                <li onclick="
+                                    document.getElementById('username1').value = '{{ newuserdata[0].hiscores.username }}';
+                                    document.getElementById('username2').value = '{{ newuserdata[1].hiscores.username }}';
+                                    document.getElementById('skill1').value = '{{ newuserdata[0].tracked_skill }}';
+                                    document.getElementById('skill2').value = '{{ newuserdata[1].tracked_skill }}';
+                                    document.getElementById('timescale').value = 'weekly'; 
+                                    document.getElementById('user-info-form').submit()
+                                ">Weekly</li>
+                                <li onclick="
+                                    document.getElementById('username1').value = '{{ newuserdata[0].hiscores.username }}';
+                                    document.getElementById('username2').value = '{{ newuserdata[1].hiscores.username }}';
+                                    document.getElementById('skill1').value = '{{ newuserdata[0].tracked_skill }}';
+                                    document.getElementById('skill2').value = '{{ newuserdata[1].tracked_skill }}';
+                                    document.getElementById('timescale').value = 'last_update'; 
+                                    document.getElementById('user-info-form').submit()
+                                ">Last Update</li>
+                                <li onclick="
+                                    document.getElementById('username1').value = '{{ newuserdata[0].hiscores.username }}';
+                                    document.getElementById('username2').value = '{{ newuserdata[1].hiscores.username }}';
+                                    document.getElementById('skill1').value = '{{ newuserdata[0].tracked_skill }}';
+                                    document.getElementById('skill2').value = '{{ newuserdata[1].tracked_skill }}';
+                                    document.getElementById('timescale').value = 'last_update'; 
+                                    document.getElementById('user-info-form').submit()
+                                ">Last Update</li>
                             </ul>
                         </div>
                     </button>
@@ -66,14 +104,17 @@
                 {% for s in [1,4,15,3,17,14,2,16,11,5,18,8,6,13,12,7,10,9,21,19,20,23,22,24,25,26,27,28,29,0] %}
                 <div class="w-24 p-1 border
                 {% if (data.hiscores.username == userdata.user1.hiscores.username and s|string == userdata.user1.tracked_skill) or ('hiscores' in userdata.user2 and data.hiscores.username == userdata.user2.hiscores.username and s|string == userdata.user2.tracked_skill) %}
-                bg-amber-800 border-amber-700
+                text-black bg-amber-500 border-amber-600 dark:text-white dark:bg-amber-800 dark:border-amber-700
                 {% else %}
-                bg-gray-800 border-gray-900 hover:bg-gray-700 hover:border-gray-800 hover:cursor-pointer hover:scale-110
+                text-black bg-gray-300 border-gray-400 hover:bg-gray-200 hover:border-gray-300 
+                dark:text-white dark:bg-gray-800 dark:border-gray-900 hover:dark:bg-gray-700 hover:dark:border-gray-800 
+                hover:cursor-pointer hover:scale-110
                 {% endif %}
                 "
                      
                 {% if newuserdata|length == 1 %}
                 onclick="
+                    document.getElementById('timescale').value = '{{ timescale }}';
                     document.getElementById('username1').value = '{{ newuserdata[0].hiscores.username }}';
                     document.getElementById('skill1').value = '{{ s }}'
                     document.getElementById('username2').value = '';
@@ -82,6 +123,7 @@
                 "
                 {% else %}
                 onclick="
+                    document.getElementById('timescale').value = '{{ timescale }}';
                     document.getElementById('username1').value = '{{ newuserdata[0].hiscores.username }}';
                     document.getElementById('username2').value = '{{ newuserdata[1].hiscores.username }}';
                     if ('{{ data.hiscores.username }}' === '{{ newuserdata[0].hiscores.username }}') {
@@ -102,11 +144,15 @@
                         </div>
                         <label class="text-xs hover:cursor-pointer">{{ data.hiscores | experience(s) | num_to_comma_string }}<strong> xp</strong></label>
                         <label class="text-xs hover:cursor-pointer"><strong>rank </strong>{{ data.hiscores | rank(s) | num_to_comma_string }}</label>
-                        {% if data.history.data_points|length > 1 %}
-                            {% set expdiff = data.history.data_points[-1].exp(s) - data.history.data_points[-2].exp(s) %}
-                            {% if expdiff > 0 %}
-                                <label class="text-xs hover:cursor-pointer text-green-600">+{{ expdiff | num_to_comma_string }}<strong> xp</strong></label>
-                            {% endif %}
+                        {% if timescale == 'last_update' %}
+                            {% set expdiff = data | diff_last_update(s) %}
+                        {% elif timescale == 'daily' %}
+                            {% set expdiff = data | diff_daily(s) %}
+                        {% elif timescale == 'weekly' %}
+                            {% set expdiff = data | diff_weekly(s) %}
+                        {% endif %}
+                        {% if expdiff > 0 %}
+                            <label class="text-xs hover:cursor-pointer text-green-900 dark:text-green-600">+{{ expdiff | num_to_comma_string }}<strong> xp</strong></label>
                         {% endif %}
                     </div>
                 </div>
