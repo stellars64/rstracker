@@ -175,11 +175,6 @@ SKILL_NAMES = [
 
 # ----- Class Defs -----
 
-class Session:
-    def __init__(self):
-        self.username = None
-        self.skill = None
-
 '''
     Basically just a wrapper around UserHiscore, that has methods to access data
     using integer codes for skills & stuff
@@ -196,40 +191,43 @@ class DataPoint:
         return self.data.skills[SKILL_INFO[skill]['rs3_api_key']].level
     def username(self):
         return self.data.username
-    def account_type(self):
-        return self.data.account_type
 
 
 class PlayerData:
     def __init__(self, username):
-        self.USERNAME = username 
-        self.DATA_PATH = Path(f'player_data/{self.USERNAME}')
-        self.data_points = self._get_cached_data_points()
-
-        current_data = DataPoint(self._get_current_hiscores())
-        
-        if (not self.data_points) or (self.latest_data().exp(SKILL_INDEX_OVERALL) != current_data.exp(SKILL_INDEX_OVERALL)):
-            self.data_points.append(current_data)
-            self._cache_data_points()
+        path = Path(f'player_data/{username}')
+        self.data_points = self._get_cached_data_points(path)
+        current = DataPoint(self._get_current_hiscores(username))
+        if (not self.data_points) or (self.latest_data().exp(SKILL_INDEX_OVERALL) != current.exp(SKILL_INDEX_OVERALL)):
+            self.data_points.append(current)
+            self._cache_data_points(path)
 
     def latest_data(self):
         return self.data_points[-1]
 
-    def _get_current_hiscores(self):
-        hs = Hiscore().user(self.USERNAME)
+    def _get_current_hiscores(self, username):
+        hs = Hiscore().user(username)
         hs.skills = hs.skills[0]
         return hs 
 
-    def _get_cached_data_points(self):
-        if not os.path.exists(self.DATA_PATH):
+    def _get_cached_data_points(self, path):
+        if not os.path.exists(path):
             return []
         else:
-            with open(self.DATA_PATH, 'rb+') as f:
+            with open(path, 'rb+') as f:
                 return pickle.load(f)
 
-    def _cache_data_points(self):
-        with open(self.DATA_PATH, 'wb+') as f:
+    def _cache_data_points(self, path):
+        with open(path, 'wb+') as f:
             pickle.dump(self.data_points, f)
+
+class Player:
+    def __init__(self, index, username, tracked_skill, data_points):
+        self.index = index
+        self.username = username
+        self.tracked_skill = tracked_skill
+        self.data_points = data_points   
+        self.account_type = self.data_points[-1].data.account_type.value
 
 
 # ----- Variables -----
@@ -238,96 +236,38 @@ app = Flask(__name__)
 
 # ----- Routes -----
 
+@app.route('/')
 @app.route('/<timescale>')
-@app.route('/<timescale>/<name>/<skill>')
-@app.route('/<timescale>/<name>/<skill>/<name2>/<skill2>')
-def rstracker(timescale='last_update', name=None, skill=None, name2=None, skill2=None):
-    
-    newuserdata = []
-
-    userdata = {
-        'user1': {},
-        'user2': {}
-    }
-
-    playerdata1 = None
-    playerdata2 = None
-
+@app.route('/<timescale>/<username1>/<skill1>')
+@app.route('/<timescale>/<username1>/<skill1>/<username2>/<skill2>')
+def rstracker(timescale='last_update', username1=None, skill1=None, username2=None, skill2=None):
+    players = []
     try:
-        if name:
-            playerdata1 = PlayerData(name)
-            userdata['user1'] = {
-                'tracked_skill': skill,
-                'hiscores': playerdata1.latest_data().data,
-                'history': playerdata1
-            }
-            
-            # this is possibly the new form the data will be passed to the web page in
-            newuserdata.append({
-                'tracked_skill': skill,
-                'hiscores': playerdata1.latest_data().data,
-                'history': playerdata1
-            })
-
-            if name2:
-                playerdata2 = PlayerData(name2)
-                userdata['user2'] = {
-                    'tracked_skill': skill2,
-                    'hiscores': playerdata2.latest_data().data,
-                    'history': playerdata2
-                }
-
-                # this is possibly the new form the data will be passed to the web page in (p2)
-                newuserdata.append({
-                    'tracked_skill': skill,
-                    'hiscores': playerdata2.latest_data().data,
-                    'history': playerdata2
-                })
-
+        if username1:
+            players.append(Player(1, username1, int(skill1), PlayerData(username1).data_points))
+            if username2:
+                players.append(Player(2, username2, int(skill2), PlayerData(username2).data_points))
     except UserNotFoundException:
         print('user not found?')
         
-
-    # THE ABOVE IS temporary, until I modify create_line_graph to accept the userdata object...
-    # graph = create_line_graph(data[0], tracked_skill[0], data[1], tracked_skill[1])
-
-    if userdata['user1']:
-        if userdata['user2']:
-            graph = create_line_graph(
-                    playerdata1, 
-                    int(userdata['user1']['tracked_skill']), 
-                    playerdata2, 
-                    int(userdata['user2']['tracked_skill']))
-        else:
-            graph = create_line_graph(
-                    playerdata1, 
-                    int(userdata['user1']['tracked_skill']), 
-                    None, None)
-    else:
-        graph = create_line_graph(None, None, None, None)
-
-    script, div = components(graph)
-
-    print('returning rstracker.html, this page should be found????')
-    return render_template(
-            'rstracker.html',
-            script=script,
-            div=div,
-            userdata=userdata,
-            newuserdata=newuserdata,
-            timescale=timescale)
+    script, div = components(create_line_graph(players))
+    return render_template('rstracker.html', script=script, div=div, players=players, timescale=timescale)
 
 @app.route('/lookup', methods=['POST'])
 def lookup():
     timescale = request.form.get('timescale')
     username1 = request.form.get('username1')
     username2 = request.form.get('username2')
-    skill1 = request.form.get('skill1')
-    skill2 = request.form.get('skill2')
-    if username2:
-        return redirect(posixpath.join(timescale, username1, skill1, username2, skill2))
-    else:
-        return redirect(posixpath.join(timescale, username1, skill1))
+    skill1    = request.form.get('skill1')
+    skill2    = request.form.get('skill2')
+    path      = posixpath.join(timescale) 
+    skill1 = '0' if not skill1 else skill1
+    skill2 = '0' if not skill2 else skill2
+    if username1 and username1 != '':
+        path = posixpath.join(path, username1, skill1)
+    if username2 and username2 != '':
+        path = posixpath.join(path, username2, skill2)
+    return redirect(path)
 
 @app.template_filter()
 def num_to_comma_string(num):
@@ -358,64 +298,50 @@ def skill_alt_text(skill):
     return SKILL_INFO[skill]['alt']
 
 @app.template_filter()
-def diff_last_update(userdata, skill):
-    if len(userdata['history'].data_points) > 1:
-        return userdata['history'].latest_data().exp(skill) - userdata['history'].data_points[-2].exp(skill)
+def diff_last_update(player, skill):
+    if len(player.data_points) > 1:
+        return player.data_points[-1].exp(skill) - player.data_points[-2].exp(skill)
     else:
         return 0
 
 @app.template_filter()
-def diff_daily(userdata, skill):
-
-    # shorthand vars
+def diff_daily(player, skill):
     today = datetime.now().date()
-    data_points = userdata['history'].data_points
-
-    # find the first data point that is today
-    # if exists return diff between that & most recent
-    for update in data_points:
-        if update.timestamp.date() == today:
-            return data_points[-1].exp(skill) - update.exp(skill)
-
-    # if there are no data points for today just return 0
+    for update in player.data_points:
+        if update.timestamp.date() == today: 
+            return player.data_points[-1].exp(skill) - update.exp(skill)
     return 0
 
 @app.template_filter()
-def diff_weekly(userdata, skill):
-
-    # shorthand vars
+def diff_weekly(player, skill):
     week_ago = datetime.now().date() - timedelta(days=7)
-    data_points = userdata['history'].data_points
-    
-    # find the first data point that is a week ago or sooner
-    # if exists return diff between that & most recent
-    for update in data_points:
+    for update in player.data_points:
         if update.timestamp.date() >= week_ago:
-            return data_points[-1].exp(skill) - update.exp(skill)
-        
-    # if there are no data points in last week return 0
+            return player.data_points[-1].exp(skill) - update.exp(skill)
     return 0
 
 # ----- Bokeh Functions -----
-
-def create_line_graph(player_data, player_skill, player2_data, player2_skill):
-
-    if player_data:
-        username = player_data.USERNAME
-        skill = player_skill
-        timestamps = list(map(lambda e: e.timestamp, player_data.data_points))
-        skill_data = list(map(lambda e: e.exp(skill), player_data.data_points))
+def create_line_graph(players):
+    
+    p1_exists = len(players) > 0
+    p2_exists = len(players) > 1
+    
+    if p1_exists:
+        username = players[0].username
+        skill = players[0].tracked_skill
+        timestamps = list(map(lambda e: e.timestamp, players[0].data_points))
+        skill_data = list(map(lambda e: e.exp(skill), players[0].data_points))
     else:
         username = ''
         skill = 0
         timestamps = []
         skill_data = []
 
-    if player2_data:
-        username2 = player2_data.USERNAME
-        skill2 = player2_skill
-        timestamps2 = list(map(lambda e: e.timestamp, player2_data.data_points))
-        skill2_data = list(map(lambda e: e.exp(skill2), player2_data.data_points))
+    if p2_exists:
+        username2 = players[1].username
+        skill2 = players[1].tracked_skill
+        timestamps2 = list(map(lambda e: e.timestamp, players[1].data_points))
+        skill2_data = list(map(lambda e: e.exp(skill2), players[1].data_points))
     else:
         username2 = ''
         skill2 = 0
@@ -433,7 +359,7 @@ def create_line_graph(player_data, player_skill, player2_data, player2_skill):
         }
         ''')
 
-    if player_data and player2_data:
+    if p2_exists:
         plot = figure(
                 title=username + '-' + SKILL_NAMES[skill] + ' / ' + username2 + '-' + 
                     SKILL_NAMES[skill2],

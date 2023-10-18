@@ -10,7 +10,13 @@
     <title>rstracker</title>
 </head>
 
-<body class="min-h-screen bg-white dark:bg-black dark:text-white font-sans">
+<body class="min-h-screen bg-white dark:bg-black dark:text-white font-sans" onload="
+        document.getElementById('username1').value = '{{ players[0].username if players[0] else '' }}';
+        document.getElementById('username2').value = '{{ players[1].username if players[1] else '' }}';
+        document.getElementById('skill1').value = '{{ players[0].tracked_skill if players[0] else '0' }}';
+        document.getElementById('skill2').value = '{{ players[1].tracked_skill if players[1] else '0' }}';
+        document.getElementById('timescale').value = '{{ timescale }}';                        
+">
     <header class="bg-amber-600 text-white sticky top-0 z-10">
         <section class="max-w-7xl mx-auto p-2 flex justify-between items-center">
             <h1 class="text-3xl">
@@ -31,45 +37,23 @@
                         Change Timescale
                         <div id="dropdownmenu" class="absolute left-0 top-[calc(100%+.25rem)] bg-amber-800 hover:bg-amber-700 p-3 shadow shadow-amber-200 rounded opacity-0 group-focus:opacity-100 transition-opacity">
                             <ul>
-                                <!-- I need to make some kind of submit javascript function -->
                                 <li onclick="
-                                
-    document.getElementById('username1').value = '{{ newuserdata[0].hiscores.username }}';
-                                    document.getElementById('username2').value = '{{ newuserdata[1].hiscores.username }}';
-                                    document.getElementById('skill1').value = '{{ newuserdata[0].tracked_skill }}';
-                                    document.getElementById('skill2').value = '{{ newuserdata[1].tracked_skill }}';
                                     document.getElementById('timescale').value = 'last_update'; 
                                     document.getElementById('user-info-form').submit()
                                 ">Last Update</li>
                                 <li onclick="
-                                    document.getElementById('username1').value = '{{ newuserdata[0].hiscores.username }}';
-                                    document.getElementById('username2').value = '{{ newuserdata[1].hiscores.username }}';
-                                    document.getElementById('skill1').value = '{{ newuserdata[0].tracked_skill }}';
-                                    document.getElementById('skill2').value = '{{ newuserdata[1].tracked_skill }}';
                                     document.getElementById('timescale').value = 'daily'; 
                                     document.getElementById('user-info-form').submit()
                                 ">Daily</li>
                                 <li onclick="
-                                    document.getElementById('username1').value = '{{ newuserdata[0].hiscores.username }}';
-                                    document.getElementById('username2').value = '{{ newuserdata[1].hiscores.username }}';
-                                    document.getElementById('skill1').value = '{{ newuserdata[0].tracked_skill }}';
-                                    document.getElementById('skill2').value = '{{ newuserdata[1].tracked_skill }}';
                                     document.getElementById('timescale').value = 'weekly'; 
                                     document.getElementById('user-info-form').submit()
                                 ">Weekly</li>
                                 <li onclick="
-                                    document.getElementById('username1').value = '{{ newuserdata[0].hiscores.username }}';
-                                    document.getElementById('username2').value = '{{ newuserdata[1].hiscores.username }}';
-                                    document.getElementById('skill1').value = '{{ newuserdata[0].tracked_skill }}';
-                                    document.getElementById('skill2').value = '{{ newuserdata[1].tracked_skill }}';
                                     document.getElementById('timescale').value = 'last_update'; 
                                     document.getElementById('user-info-form').submit()
                                 ">Last Update</li>
                                 <li onclick="
-                                    document.getElementById('username1').value = '{{ newuserdata[0].hiscores.username }}';
-                                    document.getElementById('username2').value = '{{ newuserdata[1].hiscores.username }}';
-                                    document.getElementById('skill1').value = '{{ newuserdata[0].tracked_skill }}';
-                                    document.getElementById('skill2').value = '{{ newuserdata[1].tracked_skill }}';
                                     document.getElementById('timescale').value = 'last_update'; 
                                     document.getElementById('user-info-form').submit()
                                 ">Last Update</li>
@@ -82,28 +66,28 @@
     </header>
     
     <section id="player-stats" class="max-w-7xl mx-auto my-4 flex flex-row justify-between items-center">
-        {% for key, data in userdata.items() %}
-        {% if data %}
+        {% for player in players %}
         <section class="flex flex-col items-center">
             <div class="flex flex-row">
-                <img class="w-16 h-16" src="https://services.runescape.com/m=avatar-rs/{{ data.hiscores.username }}/chat.png" alt="">
+                <img class="w-16 h-16" src="https://services.runescape.com/m=avatar-rs/{{ player.username }}/chat.png" alt="">
                 <div class="flex flex-col">
-                    {% if data.hiscores.account_type.value == 'ironman' %}
-                    <label title="ironman">🔧 {{ data.hiscores.username }}</label>
-                    {% elif data.hiscores.account_type.value == 'hardcore_ironman' %}
-                    <label title="hardcore ironman">🍅 {{ data.hiscores.username }}</label>
+                    {% if player.account_type == 'ironman' %}
+                        <label title="ironman">🔧 {{ player.username }}</label>
+                    {% elif player.account_type == 'hardcore_ironman' %}
+                        <label title="hardcore ironman">🍅 {{ player.username }}</label>
                     {% else %}
-                    <label title="normal">{{ data.hiscores.username }}</label>
+                        <label title="normal">{{ player.username }}</label>
                     {% endif %}
-                    <label title="total level">{{ data.hiscores.skills['overall'].level }}<strong> total</strong></label>
-                    <label title="total exp">{{ data.hiscores.skills['overall'].experience | num_to_comma_string }}<strong> xp</strong></label>
+                    <label title="total level">{{ player.data_points[-1].data.skills['overall'].level }}</label>
+                    <label title="total level">{{ player.data_points[-1].data.skills['overall'].level }}<strong> total</strong></label>
+                    <label title="total exp">{{ player.data_points[-1].data.skills['overall'].experience | num_to_comma_string }}<strong> xp</strong></label>
                 </div>
             </div>
 
             <div class="flex flex-row flex-wrap justify-center">
                 {% for s in [1,4,15,3,17,14,2,16,11,5,18,8,6,13,12,7,10,9,21,19,20,23,22,24,25,26,27,28,29,0] %}
                 <div class="w-24 p-1 border
-                {% if (data.hiscores.username == userdata.user1.hiscores.username and s|string == userdata.user1.tracked_skill) or ('hiscores' in userdata.user2 and data.hiscores.username == userdata.user2.hiscores.username and s|string == userdata.user2.tracked_skill) %}
+                {% if player.index == 1 and s == players[0].tracked_skill or player.index == 2 and s == players[1].tracked_skill %}
                 text-black bg-amber-500 border-amber-600 dark:text-white dark:bg-amber-800 dark:border-amber-700
                 {% else %}
                 text-black bg-gray-300 border-gray-400 hover:bg-gray-200 hover:border-gray-300 
@@ -111,45 +95,28 @@
                 hover:cursor-pointer hover:scale-110
                 {% endif %}
                 "
-                     
-                {% if newuserdata|length == 1 %}
                 onclick="
-                    document.getElementById('timescale').value = '{{ timescale }}';
-                    document.getElementById('username1').value = '{{ newuserdata[0].hiscores.username }}';
-                    document.getElementById('skill1').value = '{{ s }}'
-                    document.getElementById('username2').value = '';
-                    document.getElementById('skill2').value = '';
-                    document.getElementById('user-info-form').submit();
-                "
-                {% else %}
-                onclick="
-                    document.getElementById('timescale').value = '{{ timescale }}';
-                    document.getElementById('username1').value = '{{ newuserdata[0].hiscores.username }}';
-                    document.getElementById('username2').value = '{{ newuserdata[1].hiscores.username }}';
-                    if ('{{ data.hiscores.username }}' === '{{ newuserdata[0].hiscores.username }}') {
+                    if ('{{ player.index }}' == 1) {
                         document.getElementById('skill1').value = '{{ s }}';
-                        document.getElementById('skill2').value = '{{ newuserdata[1].tracked_skill }}';
                     } else {
-                        document.getElementById('skill1').value = '{{ userdata.user1.tracked_skill }}';
                         document.getElementById('skill2').value = '{{ s }}';
                     }
                     document.getElementById('user-info-form').submit();"
-                {% endif %}
                 >
 
                     <div class="flex flex-col hover:cursor-pointer">
                         <div class="flex flex-row justify-around items-center hover:cursor-pointer">
                             <img class="w-6 h-6 hover:cursor-pointer" src="{{ s | skill_icon_url }}" alt="{{ s | skill_alt_text }}">
-                            <label class="text-lg -translate-y-1 hover:cursor-pointer">{{ data.hiscores | level(s) }}</label>
+                            <label class="text-lg -translate-y-1 hover:cursor-pointer">{{ player.data_points[-1].data | level(s) }}</label>
                         </div>
-                        <label class="text-xs hover:cursor-pointer">{{ data.hiscores | experience(s) | num_to_comma_string }}<strong> xp</strong></label>
-                        <label class="text-xs hover:cursor-pointer"><strong>rank </strong>{{ data.hiscores | rank(s) | num_to_comma_string }}</label>
+                        <label class="text-xs hover:cursor-pointer">{{ player.data_points[-1].data | experience(s) | num_to_comma_string }}<strong> xp</strong></label>
+                        <label class="text-xs hover:cursor-pointer"><strong>rank </strong>{{ player.data_points[-1].data | rank(s) | num_to_comma_string }}</label>
                         {% if timescale == 'last_update' %}
-                            {% set expdiff = data | diff_last_update(s) %}
+                            {% set expdiff = player | diff_last_update(s) %}
                         {% elif timescale == 'daily' %}
-                            {% set expdiff = data | diff_daily(s) %}
+                            {% set expdiff = player | diff_daily(s) %}
                         {% elif timescale == 'weekly' %}
-                            {% set expdiff = data | diff_weekly(s) %}
+                            {% set expdiff = player | diff_weekly(s) %}
                         {% endif %}
                         {% if expdiff > 0 %}
                             <label class="text-xs hover:cursor-pointer text-green-900 dark:text-green-600">+{{ expdiff | num_to_comma_string }}<strong> xp</strong></label>
@@ -158,9 +125,7 @@
                 </div>
                 {% endfor %}
             </div>
-
         </section>
-        {% endif %}
         {% endfor %}
     </section>
     
@@ -171,3 +136,4 @@
     </section>
 </body>
 </html>
+jinja if array subscript exists
