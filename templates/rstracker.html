@@ -78,9 +78,8 @@
                     {% else %}
                         <label title="normal">{{ player.username }}</label>
                     {% endif %}
-                    <label title="total level">{{ player.data_points[-1].data.skills['overall'].level }}</label>
-                    <label title="total level">{{ player.data_points[-1].data.skills['overall'].level }}<strong> total</strong></label>
-                    <label title="total exp">{{ player.data_points[-1].data.skills['overall'].experience | num_to_comma_string }}<strong> xp</strong></label>
+                    <label title="total level">{{ player.data_points[-1].level(0) }}<strong> total</strong></label>
+                    <label title="total exp">{{ player.data_points[-1].exp(0) | num_to_comma_string }}<strong> xp</strong></label>
                 </div>
             </div>
 
@@ -107,10 +106,10 @@
                     <div class="flex flex-col hover:cursor-pointer">
                         <div class="flex flex-row justify-around items-center hover:cursor-pointer">
                             <img class="w-6 h-6 hover:cursor-pointer" src="{{ s | skill_icon_url }}" alt="{{ s | skill_alt_text }}">
-                            <label class="text-lg -translate-y-1 hover:cursor-pointer">{{ player.data_points[-1].data | level(s) }}</label>
+                            <label class="text-lg -translate-y-1 hover:cursor-pointer">{{ player.data_points[-1].level(s) }}</label>
                         </div>
-                        <label class="text-xs hover:cursor-pointer">{{ player.data_points[-1].data | experience(s) | num_to_comma_string }}<strong> xp</strong></label>
-                        <label class="text-xs hover:cursor-pointer"><strong>rank </strong>{{ player.data_points[-1].data | rank(s) | num_to_comma_string }}</label>
+                        <label class="text-xs hover:cursor-pointer">{{ player.data_points[-1].exp(s) | num_to_comma_string }}<strong> xp</strong></label>
+                        <label class="text-xs hover:cursor-pointer"><strong>rank </strong>{{ player.data_points[-1].rank(s) | num_to_comma_string }}</label>
                         {% if timescale == 'last_update' %}
                             {% set expdiff = player | diff_last_update(s) %}
                         {% elif timescale == 'daily' %}
@@ -129,11 +128,12 @@
         {% endfor %}
     </section>
     
+    {% if players | length > 0 %}
     <section id="skill-graph" class="max-w-7xl mx-auto mt-8">
         <text>
             {{ div | safe }}
         </text>
     </section>
+    {% endif %}
 </body>
 </html>
-jinja if array subscript exists
