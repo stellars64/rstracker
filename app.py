@@ -182,6 +182,7 @@ SKILL_NAMES = [
 class DataPoint:
     def __init__(self, data):
         self.data = data
+        self.data.username = self.data.username.lower()
         self.timestamp = datetime.now()
     def exp(self, skill):
         return self.data.skills[SKILL_INFO[skill]['rs3_api_key']].experience
@@ -195,9 +196,10 @@ class DataPoint:
 
 class PlayerData:
     def __init__(self, username):
+        username = username.lower()
+        current = DataPoint(self._get_current_hiscores(username))
         path = Path(f'player_data/{username}')
         self.data_points = self._get_cached_data_points(path)
-        current = DataPoint(self._get_current_hiscores(username))
         if (not self.data_points) or (self.latest_data().exp(SKILL_INDEX_OVERALL) != current.exp(SKILL_INDEX_OVERALL)):
             self.data_points.append(current)
             self._cache_data_points(path)
@@ -244,9 +246,9 @@ def rstracker(timescale='last_update', username1=None, skill1=None, username2=No
     players = []
     try:
         if username1:
-            players.append(Player(1, username1, int(skill1), PlayerData(username1).data_points))
+            players.append(Player(1, username1.lower(), int(skill1), PlayerData(username1).data_points))
             if username2:
-                players.append(Player(2, username2, int(skill2), PlayerData(username2).data_points))
+                players.append(Player(2, username2.lower(), int(skill2), PlayerData(username2).data_points))
     except UserNotFoundException:
         print('user not found?')
         
