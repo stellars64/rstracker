@@ -1,5 +1,6 @@
-I am passing both userdata and newuserdata to rstracker.html -- I need to switch everything to newuserdata,
-but rename newuserdata to userdata
+<!-- I am passing both userdata and newuserdata to rstracker.html -- I need to switch everything to newuserdata,
+but rename newuserdata to userdata -->
+    I created a class called Player that contains all the data
 
 In multiple places, I am setting the form elements of id=user-info-form and submitting. I need to create a js fn
 that takes in parameters or something, to avoid repetition
