@@ -10,7 +10,14 @@ enter, you should see that player's skills in Runescape, and, if
 this player has been looked up previously on the site, a line chart!
 
 RSNs to try out:
-stellarpie
-stellarpieim
-zezima
+* stellarpie
+* stellarpieim
+* zezima
 
+# tools & langs used
+* python
+* Flask
+* Bokeh
+* gunicorn
+* nginx
+* tailwindcss
