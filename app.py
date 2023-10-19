@@ -3,33 +3,21 @@ import os
 import posixpath
 from datetime import datetime, timedelta
 from pathlib import Path
-
 from constants import SKILL
-
 from rs3_api.hiscores import Hiscore
 from rs3_api.hiscores.exceptions import UserNotFoundException
-
 from flask import Flask, render_template, request, redirect, url_for
-
 from bokeh.plotting import figure
 from bokeh.embed import components
 from bokeh.models import CustomJSTickFormatter, HoverTool
-
 from rs3_api.hiscores.exceptions import UserNotFoundException
 
-# ----- Constants -----
 COLOR_PALETTE = {
     'light': '#ffffff',
     'medium': '#aaaaaa',
     'dark': '#333333'
 }
 
-# ----- Class Defs -----
-
-'''
-    Basically just a wrapper around UserHiscore, that has methods to access data
-    using integer codes for skills & stuff
-'''
 class DataPoint:
     def __init__(self, data):
         self.data = data
@@ -83,11 +71,7 @@ class Player:
         self.account_type = self.data_points[-1].data.account_type.value
 
 
-# ----- Variables -----
-
 app = Flask(__name__)
-
-# ----- Routes -----
 
 @app.route('/')
 @app.route('/<timescale>')
@@ -297,10 +281,8 @@ def create_line_graph(players):
         )
         plot.add_tools(skill_hover)
 
-
     plot.left[0].formatter = runescape_tick_formatter
     plot.yaxis[0].major_label_text_color = COLOR_PALETTE['light']
-
     skill_hover.point_policy='snap_to_data'
     skill_hover.line_policy = 'nearest'
     plot.legend.location = 'bottom_right'
@@ -312,7 +294,6 @@ def create_line_graph(players):
     plot.xgrid[0].grid_line_alpha = 0.15
     plot.ygrid[0].grid_line_alpha = 0.15
     plot.title.text_color = COLOR_PALETTE['light']
-
     return plot
 
 def add_line_to_line_graph(plot, xvals, yvals, yrange, legend_label, color, shape):
@@ -342,4 +323,3 @@ def add_line_to_line_graph(plot, xvals, yvals, yrange, legend_label, color, shap
                 fill_color=color['fill'],
                 size=8)
     return line
-    
